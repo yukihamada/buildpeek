@@ -15,6 +15,7 @@ const parts = {
   i18n: await readFile('web/i18n.mjs', 'utf8'),
   app: await readFile('web/app.mjs', 'utf8'),
 };
+const icon = `data:image/svg+xml,${encodeURIComponent(await readFile('web/icon.svg', 'utf8'))}`;
 const offline = `<!doctype html>
 <html lang="en">
 <head>
@@ -23,16 +24,15 @@ const offline = `<!doctype html>
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>BuildPeek — offline</title>
-<link rel="icon" href="data:image/svg+xml,${encodeURIComponent(await readFile('web/icon.svg', 'utf8'))}">
+<link rel="icon" href="${icon}">
 <style>${parts.css}</style>
 </head>
 <body>
-${(await readFile('web/index.html', 'utf8')).split('<body>')[1].split('</body>')[0]}
+${(await readFile('web/index.html', 'utf8')).split('<body>')[1].split('</body>')[0].replaceAll('src="./icon.svg"', `src="${icon}"`)}
 <script type="module">
 ${parts.scanner.replace(/^export /gm, '')}
 ${parts.i18n.replace(/^export /gm, '')}
 ${parts.app.replace(/^import .*$/gm, '')}
-if ($('version')) $('version').textContent = '0.1.0';
 </script>
 </body>
 </html>

@@ -149,8 +149,7 @@ $('scan').onclick = run;
 $('language').onclick = () => {
   lang = lang === 'en' ? 'ja' : 'en';
   const url = new URL(location.href); url.searchParams.set('lang', lang); history.replaceState(null, '', url);
-applyLanguage();
-if ($('version')) $('version').textContent = '0.1.0';
+  applyLanguage();
 };
 $('input').oninput = () => { reset(); status('stale'); };
 $('mode').onchange = () => { reset(); status('stale'); };
@@ -173,3 +172,4 @@ $('file').onchange = async event => {
   } catch { if (id === requestId) status('readFailed'); }
 };
 applyLanguage();
+$('version').textContent = '0.1.0';
