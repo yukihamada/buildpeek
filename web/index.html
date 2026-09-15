@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'none'; font-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Review Dockerfiles and image history for build-secret patterns locally in your browser. Free, no account, no uploads.">
+  <meta property="og:title" content="BuildPeek — Your build remembers.">
+  <meta property="og:description" content="A local-first review of the secrets your Docker build might leave behind.">
+  <meta name="theme-color" content="#102b25">
+  <title>BuildPeek — Your build remembers.</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header><a class="brand" href="./"><img src="./icon.svg" width="34" height="34" alt="">BuildPeek<span class="beta">BETA</span></a><nav><span class="nav-note" data-i18n="free"></span><button id="language" aria-label="Switch language">日本語</button></nav></header>
+  <main>
+    <section class="hero">
+      <div class="hero-copy"><p class="eyebrow" data-i18n="eyebrow"></p><h1 data-i18n="title"></h1><p class="lead" data-i18n="lead"></p><div class="pills"><span data-i18n="private"></span><span data-i18n="free"></span><span data-i18n="deps"></span></div><div class="hero-actions"><button class="primary" id="demo" data-i18n="demo"></button><button id="clean-demo" data-i18n="cleanDemo"></button></div></div>
+      <div class="build-art" aria-hidden="true"><div class="art-caption">THE BUILD MEMORY</div><div class="layer l1"><span>01</span> SOURCE</div><div class="layer l2"><span>02</span> BUILD ARGS <b>!</b></div><div class="layer l3"><span>03</span> IMAGE HISTORY <b>!</b></div><div class="layer l4"><span>04</span> WHAT YOU SHIP</div><div class="art-foot">LOOK BETWEEN THE LAYERS ↗</div></div>
+    </section>
+    <section class="workspace" id="workspace">
+      <div class="editor panel"><h2 data-i18n="inputTitle"></h2><div class="format-row"><label for="mode" data-i18n="mode"></label><select id="mode"><option value="auto" data-i18n="auto"></option><option value="dockerfile" data-i18n="dockerfile"></option><option value="history" data-i18n="history"></option><option value="json" data-i18n="json"></option></select></div><label class="input-label" for="input" data-i18n="inputLabel"></label><textarea id="input" spellcheck="false" autocomplete="off" autocapitalize="off" data-placeholder="placeholder"></textarea><div class="editor-actions"><button class="primary" id="scan" data-i18n="scan"></button><label class="file-button" for="file" data-i18n="file"></label><input id="file" type="file" accept=".txt,.json,.dockerfile,Dockerfile,text/plain,application/json"><button id="clear" class="quiet" data-i18n="clear"></button></div><p class="privacy" data-i18n="privacy"></p><details><summary data-i18n="how"></summary><pre>docker history --no-trunc --format '{{.CreatedBy}}' YOUR_IMAGE</pre><p data-i18n="command"></p></details></div>
+      <div class="results panel"><h2 data-i18n="resultTitle"></h2><p id="status" role="status" aria-live="polite"></p><div id="result"></div></div>
+    </section>
+    <section class="explanation"><div><p class="eyebrow">THE SMALL PRINT, MADE USEFUL</p><h2 data-i18n="whyTitle"></h2><p data-i18n="whyBody"></p><a href="https://docs.docker.com/build/building/secrets/" target="_blank" rel="noopener noreferrer" data-i18n="docs"></a></div><div class="fix-example"><h3 data-i18n="fixTitle"></h3><pre># syntax=docker/dockerfile:1
+RUN --mount=type=secret,id=aws \
+    AWS_SHARED_CREDENTIALS_FILE=/run/secrets/aws \
+    aws s3 cp s3://your-bucket/artifact /app/artifact</pre><p data-i18n="fixBody"></p></div></section>
+    <section class="transparency">
+      <div><h2 data-i18n="rulesTitle"></h2><p data-i18n="rulesBody"></p><ul id="rule-list"></ul><p class="built-with" data-i18n="builtWith"></p></div>
+      <div><h2 data-i18n="verify"></h2><p data-i18n="verifyBody"></p><h2 data-i18n="offline"></h2><p data-i18n="offlineBody"></p><a id="offline-link" href="./buildpeek-offline.html" download data-i18n="offline"></a><h2 data-i18n="scopeTitle"></h2><p data-i18n="scopeBody"></p><p class="meta-line"><span data-i18n="version"></span> <span id="version"></span> · <span data-i18n="license"></span></p></div>
+    </section>
+    <section class="faq"><h2 data-i18n="faqTitle"></h2><details><summary data-i18n="faq1"></summary><p data-i18n="answer1"></p></details><details><summary data-i18n="faq2"></summary><p data-i18n="answer2"></p></details><details><summary data-i18n="faq3"></summary><p data-i18n="answer3"></p></details></section>
+  </main><footer><span data-i18n="footer"></span><span data-i18n="footerNote"></span></footer>
+</body>
+</html>
