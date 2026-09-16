@@ -45,6 +45,38 @@
 - Export excludes source command; import filename excluded from result UI.
 - localStorage/sessionStorage/cookies empty. No horizontal overflow in tested languages/widths.
 
+## Launch-day watch (added 2026-09-16)
+
+`tools/launch_watch.py` reads the PH page and X metrics and appends one JSON
+line to `state/observations.jsonl`. Read-only: it never posts, upvotes or
+comments, since PH prohibits soliciting upvotes.
+
+- `gh workflow run launch-watch.yml` — manual run **succeeded** (35039735296).
+- Scheduled every 2 hours 05:00–23:00 UTC on 2026-09-18, plus 01:00 UTC on 9/19.
+  The wide window is deliberate: PH says 04:01pm JST while an earlier note here
+  said 16:01 JST, and the discrepancy was not resolved.
+- **GitHub Actions egress is blocked by PH (403)** while the same request
+  returns 200 locally. The watch records the block and a hint instead of
+  implying zero. `tools/launch-watch.local.sh` runs the same observation from
+  this Mac for real numbers on the day.
+- X metrics are read in-process with OAuth 1.0a when `xapi` is absent.
+
+Three bugs found by running it before trusting it:
+1. `live` was inferred from the absence of a "not live yet" sentence — the
+   urllib response has no such sentence, so it reported live while still
+   scheduled. Now read from PH's `disabledWhenScheduled`.
+2. Counts were taken from anywhere on the page, so Framer's 27 comments were
+   attributed to BuildPeek. Now scoped to the buildpeek object.
+3. OAuth signing omitted query params, giving 401.
+
+## Self-review against a real Docker image
+
+See `SELF-REVIEW.md`. Built `examples/deploy.Dockerfile` with Docker 29.3.1 and
+ran all three input modes. 5 true positives; Docker's own linter independently
+confirmed BP001 (`SecretsUsedInArgOrEnv`). 2 false positives, both `set -x`
+inside the upstream nginx base image — fixed by requiring a secret in play, and
+the fix is verified in production (3 findings → 1, true positive retained).
+
 ## Limitations and remaining work
 
 - **The 7-persona review was written by me, not by real users.** No one outside this session has used BuildPeek. Feedback quality is a proxy, and the personas' objections are my best guess at their constraints.
