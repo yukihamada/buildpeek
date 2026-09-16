@@ -59,7 +59,20 @@ comments, since PH prohibits soliciting upvotes.
   returns 200 locally. The watch records the block and a hint instead of
   implying zero. `tools/launch-watch.local.sh` runs the same observation from
   this Mac for real numbers on the day.
+- **Local watcher registered in launchd** (`tokyo.hamada.buildpeek-launch-watch`,
+  `StartInterval` 7200, **no KeepAlive**). Verified by `launchctl kickstart`:
+  ran, wrote to the log, exited 0, no stderr. `launchctl print` shows
+  `run interval = 7200 seconds`.
+  - Safety comes from the 2026-09-10 incident where KeepAlive + `te run`
+    respawned 12,912 times and drained the credit balance. This job has no
+    KeepAlive, a date guard (exits outside 9/18–9/19), and a lock file with
+    stale-lock recovery. All three were exercised: outside-window exit,
+    in-window run, overlapping-run skip, stale-lock recovery.
 - X metrics are read in-process with OAuth 1.0a when `xapi` is absent.
+- **Launch time corrected:** PH's "04:01pm JST" is 12-hour notation for 16:01
+  JST. 12:01am PDT = 07:01 UTC = **16:01 JST**. The "2-hour discrepancy" I
+  reported earlier was my misreading, not a conflict. The 2-hour watch interval
+  was kept anyway because it needs no changing.
 
 Three bugs found by running it before trusting it:
 1. `live` was inferred from the absence of a "not live yet" sentence — the
