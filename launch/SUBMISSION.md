@@ -1,4 +1,7 @@
-# Product Hunt submission — approval draft
+# Product Hunt submission — SUBMITTED 2026-09-16
+
+Status: **scheduled for September 18, 2026, 12:01am PT (04:01pm JST)**, entered in the GPT-6 Astra Challenge.
+Live page: https://www.producthunt.com/products/buildpeek — shows "Upvoting is disabled until the launch is live."
 
 ## Product
 
@@ -8,25 +11,23 @@
 
 **Description:** Review Dockerfiles and image history for secret-like patterns locally in your browser. Get clear next steps, export an input-free report, and share a summary card. Free, no account. Built with GPT-6 Astra; no runtime AI calls.
 
-**Website, proposed (not yet live):** https://yukihamada.github.io/buildpeek/
+**Website:** https://github.com/yukihamada/buildpeek (submission URL — `github.io` was rejected by PH's URL validator; the app itself is at https://yukihamada.github.io/buildpeek/)
 
-**Pricing:** Free
+**Pricing:** Free · **Open source:** yes · **Maker:** Yuki Hamada (@yukihamada)
 
-**Topics:** Developer Tools / Security / Privacy (confirm available labels in live form)
+**Launch tags:** Developer Tools, Security, Privacy — the form also auto-tagged GitHub from the repo URL.
 
-**Maker:** current logged-in Yuki Hamada personal account; confirm actual account shown by submission form.
+**Shoutouts:** none added (optional; the form offers a product picker rather than free text).
 
-**Target date:** September 18, 2026, 12:01 AM America/Los_Angeles = 16:01 JST. Contest acceptance unverified until submission.
+**Images:** thumbnail 240×240, two gallery images 1270×760, all from the live UI.
 
-**Shoutouts:** OpenAI; Sente if the correct product is selectable. Do not select the unrelated product named Sente. Do not claim use of tools not actually used.
+## GPT-6 Astra Challenge answer (submitted)
 
-**Images:**
-- `artifacts/ph-thumbnail.png` (240×240)
-- `artifacts/ph-gallery-1.png` (1270×760, live landing UI)
-- `artifacts/ph-gallery-2.png` (1270×760, live sample review)
-- `artifacts/demo.mp4` (local demo for X / review; PH requires a supported public YouTube URL, not a local file)
+> Astra let me argue with the product before writing it. I pushed back on the first three ideas and it kept the critique instead of defending them, which is how I landed on the narrow scope: eight explainable rules rather than a vague "AI security scan". It also wrote the harsh review I did not want to write myself — the objection that pasting a Dockerfile into a stranger's website is exactly what we train people never to do. That produced the offline single-file build that runs from file:// with no network. Astra wrote the tool; the shipped app makes no model calls and ships deterministic rules, because a reviewer should be able to read every rule it applies.
 
-## Maker first comment
+Referral source: Product Hunt Site.
+
+## Maker first comment (submitted)
 
 Hi Product Hunt, I'm Yuki.
 
@@ -44,10 +45,21 @@ Try the synthetic example first. What build pattern should the next rule explain
 
 ## Publication approval scope
 
-Owner approval requested for:
-1. BuildPeek name and the public static application.
-2. Create public `yukihamada/buildpeek` repository; commit/push this project's code and publish allowlisted web assets using GitHub Actions / GitHub Pages.
-3. Publish the above PH fields, images and maker comment, using the contest flow and September 18 schedule if the live form permits participation.
-4. Publish the X launch copy in `OUTREACH.md`, replacing only the product/PH URL placeholders with verified URLs. Organic posting only; no paid advertising or bulk outreach.
+Owner approved and completed on 2026-09-16:
+1. ✅ BuildPeek name and public static application.
+2. ✅ Public `yukihamada/buildpeek` repository, GitHub Pages deployment, verified in two browsers.
+3. ✅ Product Hunt submission scheduled for September 18 via the GPT-6 Astra Challenge flow.
+4. ✅ Two X posts published (launch announcement + scheduled-on-PH follow-up).
 
-If the contest rejects scheduling or significant copy/form changes are required, report the exact blocker instead of silently selecting another day.
+## Notes discovered during submission
+
+- PH rejected `https://yukihamada.github.io/buildpeek/` and `yukihamada.github.io/buildpeek/` as invalid. `github.com/yukihamada/buildpeek` was accepted.
+- The account's draft slot was occupied by an older **Sente** draft. Entering a new URL created a *separate* new draft, so the Sente draft was **not** overwritten or deleted. A backup of its fields was still taken at `SENTE-DRAFT-BACKUP.md`.
+- The submission URL field is locked once a draft is created; it cannot be edited later.
+- "Security" is not in the default tag list but is reachable by typing into the tag field.
+- Contest entry requires answering a 1000-char question before the date can be confirmed.
+
+## Remaining after launch day
+
+- Reply to comments; collect sanitized false-positive/missed-pattern examples.
+- Measure at +1h/+6h/+24h with `xapi metrics` and the PH page counts. No recurring jobs installed.

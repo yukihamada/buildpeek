@@ -1,0 +1,8 @@
+{
+  "name": "buildpeek-example-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p dist && printf '<!doctype html><title>ok</title><h1>ok</h1>' > dist/index.html"
+  }
+}

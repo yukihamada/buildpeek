@@ -2,12 +2,28 @@
 
 ## Deliverable
 
-- Source: `/Users/yukihamada/workspace/buildpeek/`
-- Running preview: http://127.0.0.1:8942/ (Node PID 31432 when started; lifecycle not managed)
-- Application: seven allowlisted files from `web/` to `dist/`
-- Proposed public URL: `https://yukihamada.github.io/buildpeek/` — **not deployed / unverified**
+- Source and public repo: https://github.com/yukihamada/buildpeek
+- **Production: https://yukihamada.github.io/buildpeek/ — live and browser-verified**
+- Offline single file: https://yukihamada.github.io/buildpeek/buildpeek-offline.html
+- MIT licensed. Version 0.1.0.
 
-## Actual verification
+## Post-feedback re-verification (after the 7-persona changes)
+
+- `npm test`: 21 passed, 0 failed.
+- `npm run build`: 7 assets + `buildpeek-offline.html`.
+- `python3 tools/browser_check.py`: Chromium **and** WebKit PASS, en/ja, 375/768/1440 px, 0 external requests, 0 page errors.
+- Offline build from `file://`: version renders, 6 findings, 6 copy-step buttons, **exactly one network request (itself)**, 0 errors.
+- Production URL in Chromium **and** WebKit: title, version `0.1.0`, 6 findings, 8 rules listed, 6 copy-steps, language switch to `ja`, **0 external requests**, 0 errors.
+- HTTP: root 200, offline file 200, `app.mjs` 200.
+- Demo re-recorded: H.264, 1270×760, **24.64 s**, 512441 bytes, no audio; full decode clean.
+
+## Bugs found and fixed during this round
+
+1. The version line was inserted **inside** the language-toggle handler, corrupting it. Found because the offline build showed an empty version string. Fixed and re-verified.
+2. The offline build requested `icon.svg`, which its own CSP (`img-src data:`) blocks. Icon is now inlined; the file makes one request — itself.
+3. The first browser test used `wait_for_function`, which needs `eval` that the CSP forbids. Replaced with a locator assertion; **CSP was not weakened**.
+
+## Earlier verification (before feedback changes)
 
 1. `npm test`: **21 tests, 21 passed, 0 failed**.
 2. `npm run build`: syntax checks and seven assets copied successfully.
@@ -31,9 +47,8 @@
 
 ## Limitations and remaining work
 
+- **The 7-persona review was written by me, not by real users.** No one outside this session has used BuildPeek. Feedback quality is a proxy, and the personas' objections are my best guess at their constraints.
 - Image-reading returned unsupported-image errors for this model. **Visual quality/typography is unverified by eye.** Screenshots exist for owner inspection.
-- First browser run failed because test `wait_for_function` used eval prohibited by CSP. Replaced with a locator assertion; CSP was not weakened. Both browser runs then passed.
-- No production-image detection recall/precision measurement or actual customer feedback yet. This is a text heuristic tool, not an image-layer scanner.
-- Public repository, production release/tests, PH draft/submission/schedule, X posts and reach metrics are **not done**, pending publication approval.
-- Logged-in PH new-product form and X authenticated account were checked. Final contest acceptance/scheduling is unverified.
+- No production-image recall/precision measurement. This is a text heuristic tool, not an image-layer scanner.
+- Product Hunt submission, X posts and reach metrics are **not done** — no submission or post has been made.
 - No recurring promotion/metrics jobs installed.

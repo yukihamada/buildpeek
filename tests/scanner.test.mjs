@@ -59,6 +59,8 @@ test('mount does not excuse printing a secret or writing auth config', () => {
 });
 test('shell tracing and echoing secret variables need review', () => {
   assert.deepEqual(ids('RUN set -eux; echo $API_KEY'), ['BP008']);
+  assert.deepEqual(ids('RUN set -eux; npm ci'), []);  // bare tracing is not a secret signal
+  assert.deepEqual(ids('RUN set -eux; --mount=type=secret,id=npm npm ci'), ['BP008']);
 });
 test('image config scans history and env with precise locations', () => {
   const result = scan(JSON.stringify({ history: [{ created_by: '/bin/sh -c #(nop) ARG GITHUB_TOKEN' }], config: { Env: ['PASSWORD=example'] } }));

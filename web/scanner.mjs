@@ -135,7 +135,12 @@ export function scan(input, mode = 'auto') {
       if (/(?:^|\s)(?:\.|\.\/|\*)(?:\s|$)/.test(sources)) add('BP006');
     }
     if (/git\s+config\b.*(?:https?:\/\/[^\s]{1,512}@|credential\.helper\s+store)|npm\s+config\s+set\b.*(?:_auth|token)|(?:>|tee\s+)[^;&|]*(?:\.npmrc|\.netrc|\.git-credentials)/i.test(text)) add('BP007');
-    if (/\bset\s+-[a-z]*x|\b(?:echo|printf)\b[^;&|]*(?:\$\{?\w*(?:TOKEN|SECRET|PASSWORD|API_KEY))|\bcat\s+\/run\/secrets\//i.test(text)) add('BP008');
+    // Bare `set -x` is common in base images and says nothing about secrets, so only
+    // flag tracing when a secret variable or mount is actually in play.
+    const traces = /\bset\s+-[a-z]*x/i.test(text);
+    const secretInPlay = /\$\{?\w*(?:TOKEN|SECRET|PASSWORD|API_KEY|CREDENTIAL)|--mount=type=secret|\/run\/secrets\//i.test(text);
+    if ((traces && secretInPlay)
+      || /\b(?:echo|printf)\b[^;&|]*(?:\$\{?\w*(?:TOKEN|SECRET|PASSWORD|API_KEY))|\bcat\s+\/run\/secrets\//i.test(text)) add('BP008');
   }
   return {
     version: '0.1.0', mode: detectedMode, records: rows.length, secretMounts, truncated,
