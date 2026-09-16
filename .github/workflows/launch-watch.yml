@@ -1,0 +1,58 @@
+name: BuildPeek launch day watch
+
+# Read-only observation of the Product Hunt page and X metrics on launch day.
+# Appends one JSON line per run to state/observations.jsonl and commits it.
+#
+# It never posts, never upvotes and never comments. Product Hunt prohibits
+# asking for upvotes; this workflow only measures.
+#
+# Schedule note: PH confirmed "September 18 at 12:01am PT (04:01pm JST)".
+# An earlier note in this repo said 16:01 JST, a 2-hour discrepancy, so the
+# schedule below deliberately covers both by running every 2 hours across the
+# day rather than at three hand-picked times.
+
+on:
+  schedule:
+    # Every 2 hours from 05:00 UTC to 23:00 UTC on 2026-09-18 (UTC minutes matter).
+    - cron: "0 5,7,9,11,13,15,17,19,21,23 18 9 *"
+    # Plus one run on the 19th to capture the final 24h mark.
+    - cron: "0 1 19 9 *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: buildpeek-launch-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Observe
+        env:
+          TWEET_IDS: "2100002084640956700,2100010007475712451"
+          X_CONSUMER_KEY: ${{ secrets.X_CONSUMER_KEY }}
+          X_CONSUMER_SECRET: ${{ secrets.X_CONSUMER_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        run: |
+          # xapi is not on the runner; metrics are read via the API directly
+          # when the helper is absent, so the run still records PH numbers.
+          python3 tools/launch_watch.py | tee /tmp/obs.json
+
+      - name: Commit observations
+        run: |
+          git config user.name "buildpeek-launch-watch"
+          git config user.email "bot@yukihamada.jp"
+          git add state/observations.jsonl
+          git diff --cached --quiet && { echo "no change"; exit 0; }
+          git commit -m "chore: launch observation $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+          git push origin HEAD:main
