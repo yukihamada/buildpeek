@@ -27,15 +27,25 @@ UA = 'BuildPeekLaunchWatch/1.0 (+https://github.com/yukihamada/buildpeek)'
 
 
 def fetch_ph():
-    """Return (status, text). Never raises."""
+    """Return (status, text). Never raises.
+
+    GitHub Actions egress IPs are sometimes blocked by PH (observed 403 on a
+    runner while the same request succeeded locally), so retry with backoff and
+    report the final status honestly rather than treating a block as zero.
+    """
     req = urllib.request.Request(PH_URL, headers={'User-Agent': UA, 'Accept': 'text/html'})
-    try:
-        with urllib.request.urlopen(req, timeout=45) as r:
-            return r.status, r.read().decode('utf-8', 'replace')
-    except urllib.error.HTTPError as e:
-        return e.code, ''
-    except Exception as e:
-        return 0, f'{type(e).__name__}: {e}'
+    last = (0, '')
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=45) as r:
+                return r.status, r.read().decode('utf-8', 'replace')
+        except urllib.error.HTTPError as e:
+            last = (e.code, '')
+        except Exception as e:
+            last = (0, f'{type(e).__name__}: {e}')
+        if attempt < 2:
+            time.sleep(5 * (attempt + 1))
+    return last
 
 
 def parse_ph(text):
@@ -180,6 +190,8 @@ def main():
         obs['ph'].update(parse_ph(text))
     else:
         obs['ph']['note'] = (text or 'no body')[:200]
+        obs['ph']['hint'] = ('PH blocked this network. Run `python3 tools/launch_watch.py` '
+                             'locally to record real numbers.')
 
     ids = [i.strip() for i in os.environ.get('TWEET_IDS', '').split(',') if i.strip()]
     if ids:
