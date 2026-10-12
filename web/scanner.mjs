@@ -80,13 +80,21 @@ function recordsFrom(input, requested) {
     return { mode, rows };
   }
   if (!['dockerfile', 'history'].includes(mode)) throw new Error('invalidMode');
+  // A Dockerfile parser directive like `# escape=` sets the line-continuation
+  // character (backtick is common on Windows). Default backslash is unchanged.
+  let escape = '\\';
+  if (mode === 'dockerfile') {
+    const directive = input.match(/(?:^|\n)\s*#\s*escape\s*=\s*(\S)/i);
+    if (directive) escape = directive[1];
+  }
+  const continues = new RegExp(escape.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$');
   const rows = [];
   let pending = '', firstLine = 1;
   input.split(/\r?\n/).forEach((text, i) => {
     if (!pending && (!text.trim() || (mode === 'dockerfile' && text.trimStart().startsWith('#')))) return;
     if (!pending) firstLine = i + 1;
-    pending += text.replace(/\\\s*$/, '') + ' ';
-    if (!/\\\s*$/.test(text)) {
+    pending += text.replace(continues, '') + ' ';
+    if (!continues.test(text)) {
       rows.push({ text: pending.trim(), line: firstLine, location: 'line' });
       pending = '';
     }

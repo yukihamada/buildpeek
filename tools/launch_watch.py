@@ -51,51 +51,38 @@ def fetch_ph():
 def parse_ph(text):
     """Best-effort counts from PH's embedded JSON.
 
-    Returns None for anything not found, so a missing field is never reported
-    as 0. `live` comes from an explicit scheduled flag, not from the absence of
+    Omits anything not found, so a missing field is never reported
+    as 0. `live` comes from the matching Post's explicit launchState, not from the absence of
     a "not live yet" sentence — an early version of this script inferred live
     from missing text and wrongly reported the launch as already public.
     """
-    out = {}
-
-    # Scope to BuildPeek's own product object. The page embeds many other
-    # products (Framer, etc.) whose counts would otherwise be misattributed.
-    # The tagline also appears in <head> metadata, so anchor on the slug and
-    # take a window after it, not around the tagline.
-    # followersCount sits just before the slug in PH's payload, so the window
-    # has to start before it rather than at it.
-    m = re.search(r'"slug"\s*:\s*"buildpeek"', text, re.I)
-    idx = m.start() if m else -1
-    scope = text[max(0, idx - 4000): idx + 6000] if idx >= 0 else text
-    out['scoped'] = idx >= 0
-
-    def grab_int(key):
-        m = re.search(r'"%s"\s*:\s*(-?\d+)' % key, scope)
-        return int(m.group(1)) if m else None
-
-    def grab_str(key):
-        m = re.search(r'"%s"\s*:\s*"([^"]*)"' % key, scope)
-        return m.group(1) if m else None
-
-    for src, dst in (('followersCount', 'followers'), ('reviewsCount', 'reviews'),
-                     ('votesCount', 'upvotes'), ('commentsCount', 'comments')):
-        v = grab_int(src)
-        if v is not None:
-            out[dst] = v
-
-    scheduled_at = grab_str('scheduledAt')
-    disabled = re.search(r'"disabledWhenScheduled"\s*:\s*(true|false)', text)
-    if scheduled_at:
-        out['scheduled_at'] = scheduled_at
-    if disabled:
-        out['disabled_when_scheduled'] = disabled.group(1) == 'true'
-        # Live only when PH says voting is enabled; absence of the flag is unknown.
-        out['live'] = disabled.group(1) == 'false'
-
-    for key in ('featuredAt', 'createdAt'):
-        v = grab_str(key)
-        if v:
-            out[key] = v
+    out = {'scoped': False}
+    decoder = json.JSONDecoder()
+    # Decode individual objects, not a character window around a slug. JSON key
+    # order is unspecified, and nearby/nested products can have unrelated counts.
+    for match in re.finditer(r'\{', text):
+        try:
+            post, _ = decoder.raw_decode(text, match.start())
+        except ValueError:
+            continue
+        if post.get('slug') != 'buildpeek' or post.get('__typename') not in ('Product', 'Post'):
+            continue
+        out['scoped'] = True
+        counts = (('followersCount', 'followers'), ('reviewsCount', 'reviews')) if post['__typename'] == 'Product' else (
+            ('latestScore', 'score'), ('votesCount', 'upvotes'), ('commentsCount', 'comments'))
+        for src, dst in counts:
+            if type(post.get(src)) is int and post[src] >= 0:
+                out[dst] = post[src]
+        if post['__typename'] != 'Post':
+            continue
+        if post.get('launchState') in ('live', 'scheduled', 'upcoming', 'draft'):
+            out['launch_state'] = post['launchState']
+            out['live'] = post['launchState'] == 'live'
+        if type(post.get('disabledWhenScheduled')) is bool:
+            out['disabled_when_scheduled'] = post['disabledWhenScheduled']
+        for src, dst in (('scheduledAt', 'scheduled_at'), ('featuredAt', 'featuredAt'), ('createdAt', 'createdAt')):
+            if isinstance(post.get(src), str):
+                out[dst] = post[src]
     return out
 
 

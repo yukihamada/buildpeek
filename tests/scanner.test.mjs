@@ -46,6 +46,20 @@ test('multiline Dockerfile preserves first line position', () => {
   const result = scan('# comment\nFROM alpine\nENV NODE_ENV=production \\\n API_KEY=example', 'dockerfile');
   assert.equal(result.findings[0].line, 3);
 });
+test('escape directive switches continuation while backslash stays default', () => {
+  const backtick = String.fromCharCode(96);
+  const text = `# escape=${backtick}\nFROM alpine\nENV NODE_ENV=production ${backtick}\n API_KEY=example`;
+  for (const mode of ['dockerfile', 'auto']) {
+    const result = scan(text, mode);
+    assert.deepEqual(result.findings.map(f => [f.id, f.line]), [['BP002', 3]]);
+  }
+  // Without the directive a trailing backtick is not a continuation.
+  assert.deepEqual(ids('FROM alpine\nENV NODE_ENV=production `\n API_KEY=example'), []);
+  // With a non-default escape, a trailing backslash is literal text, not a
+  // continuation (Docker replaces the escape character, it does not add one).
+  const both = scan(`# escape=${backtick}\nFROM alpine\nENV NODE_ENV=production \\\n API_KEY=example`, 'dockerfile');
+  assert.deepEqual(both.findings.map(f => f.id), []);
+});
 test('Dockerfile comments do not produce findings', () => {
   assert.deepEqual(ids('# ARG PASSWORD\nFROM alpine'), []);
 });
